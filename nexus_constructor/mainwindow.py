@@ -4,6 +4,8 @@ from nexus_constructor.addcomponentwindow import AddComponentDialog
 from nexus_constructor.utils import file_dialog
 from ui.mainwindow import Ui_MainWindow
 import silx.gui.hdf5
+from nexus_constructor.component_tree_view import ComponentEditorDelegate
+from nexus_constructor.component_tree_model import ComponentTreeModel
 
 
 from nexus_constructor.nexus_filewriter_json import writer
@@ -20,7 +22,7 @@ class MainWindow(Ui_MainWindow):
     def setupUi(self, main_window):
         super().setupUi(main_window)
 
-        self.pushButton.clicked.connect(self.show_add_component_window)
+        self.addComponentButton.clicked.connect(self.show_add_component_window)
         self.actionExport_to_NeXus_file.triggered.connect(self.save_to_nexus_file)
         self.actionOpen_NeXus_file.triggered.connect(self.open_nexus_file)
         self.actionExport_to_Filewriter_JSON.triggered.connect(
@@ -37,9 +39,36 @@ class MainWindow(Ui_MainWindow):
         self.treemodel.insertH5pyObject(self.nexus_wrapper.nexus_file)
         self.nexus_wrapper.file_changed.connect(self.update_nexus_file_structure_view)
         self.verticalLayout.addWidget(self.widget)
-        self.listView.setModel(self.nexus_wrapper.get_component_list())
+        #self.listView.setModel(self.nexus_wrapper.get_component_list())
 
         self.widget.setVisible(True)
+
+        import nexus_constructor.test_components as Cp
+        Sample = Cp.Component("Sample")
+        Detector = Cp.Cylinder(Name="Detector1")
+        Monitor = Cp.Cylinder(Name="Monitor1")
+        Detector.Transformations.append(Cp.Translation("DetMovement", Detector))
+        Detector.Transformations.append(Cp.Rotation("DetRotation", Detector))
+        MonTrans = Cp.Translation("MonMovement", Monitor)
+        MonTrans.X = 0.5
+        MonTrans.Y = -10
+        MonTrans.Z = 5
+        Monitor.Transformations.append(MonTrans)
+        Components = [Sample, Detector, Monitor]
+
+        self.component_model = ComponentTreeModel(Components)
+
+        self.componentTreeView.setDragEnabled(True)
+        self.componentTreeView.setAcceptDrops(True)
+        self.componentTreeView.setDropIndicatorShown(True)
+        self.componentTreeView.header().hide()
+        self.component_delegate = ComponentEditorDelegate(self.componentTreeView)
+        self.componentTreeView.setItemDelegate(self.component_delegate)
+        self.componentTreeView.setModel(self.component_model)
+        self.componentTreeView.updateEditorGeometries()
+        self.componentTreeView.updateGeometries()
+        self.componentTreeView.updateGeometry()
+
 
     def update_nexus_file_structure_view(self, nexus_file):
         self.treemodel.clear()

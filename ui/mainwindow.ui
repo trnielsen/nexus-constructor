@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1263</width>
+    <width>1287</width>
     <height>712</height>
    </rect>
   </property>
@@ -31,24 +31,24 @@
         <property name="currentIndex">
          <number>0</number>
         </property>
-        <widget class="QWidget" name="tab_2">
+        <widget class="QWidget" name="componentsTab">
          <attribute name="title">
           <string>Components</string>
          </attribute>
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <item>
-           <widget class="QPushButton" name="pushButton">
+           <widget class="QPushButton" name="addComponentButton">
             <property name="text">
              <string>Add component</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QListView" name="listView"/>
+           <widget class="QTreeView" name="componentTreeView"/>
           </item>
          </layout>
         </widget>
-        <widget class="QWidget" name="tab">
+        <widget class="QWidget" name="fileTab">
          <attribute name="title">
           <string>NeXus File Layout</string>
          </attribute>
@@ -89,8 +89,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1263</width>
-     <height>19</height>
+     <width>1287</width>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
