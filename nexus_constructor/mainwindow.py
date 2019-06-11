@@ -24,7 +24,6 @@ class MainWindow(Ui_MainWindow):
     def setupUi(self, main_window):
         super().setupUi(main_window)
 
-        # self.addComponentButton.clicked.connect(self.show_add_component_window)
         self.actionExport_to_NeXus_file.triggered.connect(self.save_to_nexus_file)
         self.actionOpen_NeXus_file.triggered.connect(self.open_nexus_file)
         self.actionExport_to_Filewriter_JSON.triggered.connect(
