@@ -1,22 +1,11 @@
-from enum import Enum, unique
 from typing import List
 import os
 import xmltodict
 
 
-@unique
-class ComponentType(Enum):
-    SAMPLE = "Sample"
-    DETECTOR = "Detector"
-    MONITOR = "Monitor"
-    SOURCE = "Source"
-    SLIT = "Slit"
-    MODERATOR = "Moderator"
-    DISK_CHOPPER = "Disk Chopper"
+PIXEL_COMPONENT_TYPES = ["NXmonitor", "NXdetector", "NXdetector_module"]
 
-    @classmethod
-    def values(cls):
-        return [item.value for item in cls]
+# TODO: unit test this
 
 
 def __list_base_class_files(repo_directory):
@@ -45,7 +34,7 @@ def make_dictionary_of_class_definitions(
                 try:
                     for field in fields:
                         class_definitions[nx_class_name].append(field["@name"])
-                except:
+                except Exception:
                     class_definitions[nx_class_name].append(fields["@name"])
             except KeyError:
                 # TODO: No key called "field"

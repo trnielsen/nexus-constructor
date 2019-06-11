@@ -8,14 +8,18 @@ from nexus_constructor.qml_models.geometry_models import (
     NoShapeModel,
 )
 from PySide2.QtGui import QValidator
-from ui.addcomponent import Ui_AddComponentDialog
-from nexus_constructor.component_type import make_dictionary_of_class_definitions
+from ui.add_component import Ui_AddComponentDialog
+from nexus_constructor.component_type import (
+    make_dictionary_of_class_definitions,
+    PIXEL_COMPONENT_TYPES,
+)
 from nexus_constructor.validators import UnitValidator, NameValidator
 from nexus_constructor.nexus_wrapper import NexusWrapper
-from nexus_constructor.utils import file_dialog
+from nexus_constructor.utils import file_dialog, validate_line_edit
 import os
 from functools import partial
 
+# TODO: stop enter closing the dialog
 GEOMETRY_FILE_TYPES = {"OFF Files": ["off", "OFF"], "STL Files": ["stl", "STL"]}
 
 
@@ -57,6 +61,10 @@ class GeometryType(Enum):
 
 
 class OkValidator(QObject):
+    """
+    Validator to enable the OK button. Several criteria have to be met before this can occur depending on the geometry type.
+    """
+
     def __init__(self, no_geometry_button, mesh_button):
         super().__init__()
         self.name_is_valid = False
@@ -81,6 +89,10 @@ class OkValidator(QObject):
         self.validate_ok()
 
     def validate_ok(self):
+        """
+        Validates the fields in order to dictate whether the OK button should be disabled or enabled.
+        :return: None, but emits the isValid signal.
+        """
         unacceptable = [
             not self.name_is_valid,
             not self.no_geometry_button.isChecked() and not self.units_are_valid,
@@ -90,6 +102,7 @@ class OkValidator(QObject):
         print("Is valid {}".format(unacceptable))
         self.isValid.emit(not any(unacceptable))
 
+    # Signal to indicate that the fields are valid or invalid. False: invalid.
     isValid = Signal(bool)
 
 
@@ -103,10 +116,14 @@ class AddComponentDialog(Ui_AddComponentDialog):
         )
 
     def setupUi(self, parent_dialog):
+        """ Sets up push buttons and validators for the add component window. """
         super().setupUi(parent_dialog)
 
         # Connect the button calls with functions
         self.buttonBox.button(QDialogButtonBox.Ok).clicked.connect(self.on_ok)
+
+        # Disable by default as component name will be missing at the very least.
+        self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
 
         # Set default URL to nexus base classes in web view
         self.webEngineView.setUrl(
@@ -138,7 +155,7 @@ class AddComponentDialog(Ui_AddComponentDialog):
 
         self.fileLineEdit.setValidator(FileValidator(GEOMETRY_FILE_TYPES))
         self.fileLineEdit.validator().isValid.connect(
-            partial(self.validate_line_edit, self.fileLineEdit)
+            partial(validate_line_edit, self.fileLineEdit)
         )
         self.fileLineEdit.validator().isValid.connect(self.ok_validator.set_file_valid)
 
@@ -146,7 +163,7 @@ class AddComponentDialog(Ui_AddComponentDialog):
             self.on_component_type_change
         )
 
-        # Set default geometry type to mesh and show the related mesh fields such as geometry file etc.
+        # Set default geometry type and show the related fields.
         self.noGeometryRadioButton.setChecked(True)
         self.show_no_geometry_fields()
 
@@ -154,21 +171,28 @@ class AddComponentDialog(Ui_AddComponentDialog):
         name_validator.list_model = self.nexus_wrapper.get_component_list()
         self.nameLineEdit.setValidator(name_validator)
         self.nameLineEdit.validator().isValid.connect(
-            partial(self.validate_line_edit, self.nameLineEdit)
+            partial(validate_line_edit, self.nameLineEdit)
         )
+
+        validate_line_edit(self.nameLineEdit, False)
+        validate_line_edit(self.fileLineEdit, False)
+
         self.nameLineEdit.validator().isValid.connect(self.ok_validator.set_name_valid)
 
         self.unitsLineEdit.setValidator(UnitValidator())
-        self.unitsLineEdit.validator().isValid.connect(self.validate_units)
+        self.unitsLineEdit.validator().isValid.connect(
+            partial(
+                validate_line_edit,
+                self.unitsLineEdit,
+                tooltip_on_reject="Units not valid",
+                tooltip_on_accept="Units Valid",
+            )
+        )
         self.unitsLineEdit.validator().isValid.connect(
             self.ok_validator.set_units_valid
         )
 
         self.componentTypeComboBox.addItems(list(self.component_types.keys()))
-
-    def validate_line_edit(self, line_edit, is_valid: bool):
-        colour = "#FFFFFF" if is_valid else "#f6989d"
-        line_edit.setStyleSheet(f"QLineEdit {{ background-color: {colour} }}")
 
     def on_component_type_change(self):
         self.webEngineView.setUrl(
@@ -176,12 +200,15 @@ class AddComponentDialog(Ui_AddComponentDialog):
                 f"http://download.nexusformat.org/sphinx/classes/base_classes/{self.componentTypeComboBox.currentText()}.html"
             )
         )
-
-    def validate_units(self, is_valid):
-        self.ticklabel.setText("✅" if is_valid else "❌")
-        self.ticklabel.setToolTip("Unit valid" if is_valid else "Unit not valid")
+        self.pixelOptionsBox.setVisible(
+            self.componentTypeComboBox.currentText() in PIXEL_COMPONENT_TYPES
+        )
 
     def mesh_file_picker(self):
+        """
+        Opens the mesh file picker. Sets the file name line edit to the file path.
+        :return: None
+        """
         filename = file_dialog(False, "Open Mesh", GEOMETRY_FILE_TYPES)
         if filename:
             self.fileLineEdit.setText(filename)
@@ -203,6 +230,10 @@ class AddComponentDialog(Ui_AddComponentDialog):
         self.cylinderOptionsBox.setVisible(False)
 
     def generate_geometry_model(self):
+        """
+        Generates a geometry model depending on the type of geometry selected and the current values of the lineedits that apply to the particular geometry type.
+        :return: The generated model.
+        """
         if self.CylinderRadioButton.isChecked():
             geometry_model = CylinderModel()
             geometry_model.set_unit(self.unitsLineEdit.text())

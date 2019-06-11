@@ -1,9 +1,9 @@
 from PySide2.QtWidgets import QDialog, QAction, QToolBar
 from PySide2.QtGui import QIcon
 from nexus_constructor.nexus_wrapper import NexusWrapper
-from nexus_constructor.addcomponentwindow import AddComponentDialog
+from nexus_constructor.add_component_window import AddComponentDialog
 from nexus_constructor.utils import file_dialog
-from ui.mainwindow import Ui_MainWindow
+from ui.main_window import Ui_MainWindow
 import silx.gui.hdf5
 from nexus_constructor.component_tree_view import ComponentEditorDelegate
 from nexus_constructor.component_tree_model import ComponentTreeModel
@@ -94,7 +94,7 @@ class MainWindow(Ui_MainWindow):
         self.nexus_wrapper.open_file(filename)
 
     def show_add_component_window(self):
-        add_window = QDialog()
-        add_window.ui = AddComponentDialog(self.nexus_wrapper)
-        add_window.ui.setupUi(add_window)
-        add_window.exec()
+        self.add_window = QDialog()
+        self.add_window.ui = AddComponentDialog(self.nexus_wrapper)
+        self.add_window.ui.setupUi(self.add_window)
+        self.add_window.show()

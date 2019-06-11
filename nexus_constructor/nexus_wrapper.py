@@ -3,11 +3,15 @@ import h5py
 from nexus_constructor.qml_models import instrument_model
 from PySide2.QtCore import Signal, QObject
 
-COMPS_IN_ENTRY = ["NXdetector", "NXsample"]
+COMPS_IN_ENTRY = ["NXmonitor", "NXsample"]
 
 
-def set_up_in_memory_nexus_file():
-    return h5py.File("nexus-constructor", mode="x", driver="core", backing_store=False)
+def set_up_in_memory_nexus_file(filename):
+    """
+    Creates an in-memory nexus-file to store the model data in.
+    :return: The file object.
+    """
+    return h5py.File(filename, mode="x", driver="core", backing_store=False)
 
 
 class NexusWrapper(QObject):
@@ -16,18 +20,22 @@ class NexusWrapper(QObject):
     Also contains a list of components for use in a listview.
     """
 
+    # Signal that indicates the nexus file has been changed in some way
     file_changed = Signal("QVariant")
 
-    def __init__(self):
+    def __init__(self, filename="nexus-constructor"):
         super().__init__()
-        self.nexus_file = set_up_in_memory_nexus_file()
+        self.nexus_file = set_up_in_memory_nexus_file(filename)
         self.entry_group = self.nexus_file.create_group("entry")
         self.entry_group.attrs["NX_class"] = "NXentry"
+
+        sample = self.entry_group.create_group("sample")
+        sample.attrs["NX_class"] = "NXsample"
+
         self.instrument_group = self.entry_group.create_group("instrument")
         self.instrument_group.attrs["NX_class"] = "NXinstrument"
 
         self.components_list_model = instrument_model.InstrumentModel()
-        self.components_list_model.initialise(self.entry_group)
         self._emit_file()
 
     def _emit_file(self):
@@ -82,9 +90,9 @@ class NexusWrapper(QObject):
         :param geometry: Geometry model for the component.
         :return: None
         """
-        component_name = component_name.replace(" ", "_")
+        component_name = convert_name_with_spaces(component_name)
         self.components_list_model.add_component(
-            component_type=component_type,
+            nx_class=component_type,
             description=description,
             name=component_name,
             geometry_model=geometry,
@@ -93,10 +101,14 @@ class NexusWrapper(QObject):
         instrument_group = self.entry_group["instrument"]
 
         if component_type in COMPS_IN_ENTRY:
-            # If the component should be put in entry rather than instrument
+            # If the component should be put in /entry/ rather than /instrument/
             instrument_group = self.entry_group
 
         component_group = instrument_group.create_group(component_name)
         component_group.attrs["NX_class"] = component_type
 
         self._emit_file()
+
+
+def convert_name_with_spaces(component_name):
+    return component_name.replace(" ", "_")
