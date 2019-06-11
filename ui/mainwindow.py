@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'mainwindow.ui',
 # licensing of 'mainwindow.ui' applies.
 #
-# Created: Fri Jun  7 10:56:31 2019
+# Created: Tue Jun 11 15:45:33 2019
 #      by: pyside2-uic  running on PySide2 5.12.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -28,12 +28,12 @@ class Ui_MainWindow(object):
         self.componentsTab.setObjectName("componentsTab")
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.componentsTab)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
-        self.addComponentButton = QtWidgets.QPushButton(self.componentsTab)
-        self.addComponentButton.setObjectName("addComponentButton")
-        self.verticalLayout_2.addWidget(self.addComponentButton)
+        self.componentsTabLayout = QtWidgets.QVBoxLayout()
+        self.componentsTabLayout.setObjectName("componentsTabLayout")
         self.componentTreeView = QtWidgets.QTreeView(self.componentsTab)
         self.componentTreeView.setObjectName("componentTreeView")
-        self.verticalLayout_2.addWidget(self.componentTreeView)
+        self.componentsTabLayout.addWidget(self.componentTreeView)
+        self.verticalLayout_2.addLayout(self.componentsTabLayout)
         self.tabWidget.addTab(self.componentsTab, "")
         self.fileTab = QtWidgets.QWidget()
         self.fileTab.setObjectName("fileTab")
@@ -55,7 +55,7 @@ class Ui_MainWindow(object):
         self.sceneWidget.setSizePolicy(sizePolicy)
         self.sceneWidget.setMinimumSize(QtCore.QSize(745, 0))
         self.sceneWidget.setObjectName("sceneWidget")
-        self.gridLayout_3.addWidget(self.sceneWidget, 0, 1, 1, 2)
+        self.gridLayout_3.addWidget(self.sceneWidget, 0, 1, 1, 1)
         self.gridLayout.addLayout(self.gridLayout_3, 1, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar()
@@ -84,7 +84,6 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QtWidgets.QApplication.translate("MainWindow", "NeXus Constructor", None, -1))
-        self.addComponentButton.setText(QtWidgets.QApplication.translate("MainWindow", "Add component", None, -1))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.componentsTab), QtWidgets.QApplication.translate("MainWindow", "Components", None, -1))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.fileTab), QtWidgets.QApplication.translate("MainWindow", "NeXus File Layout", None, -1))
         self.menuFile.setTitle(QtWidgets.QApplication.translate("MainWindow", "File", None, -1))

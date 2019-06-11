@@ -37,14 +37,11 @@
          </attribute>
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <item>
-           <widget class="QPushButton" name="addComponentButton">
-            <property name="text">
-             <string>Add component</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QTreeView" name="componentTreeView"/>
+           <layout class="QVBoxLayout" name="componentsTabLayout">
+            <item>
+             <widget class="QTreeView" name="componentTreeView"/>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
@@ -64,7 +61,7 @@
         </widget>
        </widget>
       </item>
-      <item row="0" column="1" colspan="2">
+      <item row="0" column="1">
        <widget class="QWidget" name="sceneWidget" native="true">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">

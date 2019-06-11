@@ -3,7 +3,7 @@
 from PySide2.QtCore import Qt, QSize, QPoint
 from PySide2.QtWidgets import QApplication, QTreeView, QHBoxLayout, QStyledItemDelegate, QFrame, QPushButton, QVBoxLayout, QSizePolicy, QLabel, QLineEdit
 from nexus_constructor.component_tree_model import *
-from nexus_constructor.test_components import *
+from nexus_constructor.component_wrapper import *
 from PySide2.QtGui import QPixmap, QRegion
 
 class RotateSettingsFrame(QFrame):

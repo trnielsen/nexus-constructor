@@ -1,4 +1,5 @@
-from PySide2.QtWidgets import QDialog
+from PySide2.QtWidgets import QDialog, QAction, QToolBar
+from PySide2.QtGui import QIcon
 from nexus_constructor.nexus_wrapper import NexusWrapper
 from nexus_constructor.addcomponentwindow import AddComponentDialog
 from nexus_constructor.utils import file_dialog
@@ -6,6 +7,7 @@ from ui.mainwindow import Ui_MainWindow
 import silx.gui.hdf5
 from nexus_constructor.component_tree_view import ComponentEditorDelegate
 from nexus_constructor.component_tree_model import ComponentTreeModel
+from nexus_constructor.component_wrapper import generate_wrapper_component_list
 
 
 from nexus_constructor.nexus_filewriter_json import writer
@@ -22,7 +24,7 @@ class MainWindow(Ui_MainWindow):
     def setupUi(self, main_window):
         super().setupUi(main_window)
 
-        self.addComponentButton.clicked.connect(self.show_add_component_window)
+        # self.addComponentButton.clicked.connect(self.show_add_component_window)
         self.actionExport_to_NeXus_file.triggered.connect(self.save_to_nexus_file)
         self.actionOpen_NeXus_file.triggered.connect(self.open_nexus_file)
         self.actionExport_to_Filewriter_JSON.triggered.connect(
@@ -39,24 +41,11 @@ class MainWindow(Ui_MainWindow):
         self.treemodel.insertH5pyObject(self.nexus_wrapper.nexus_file)
         self.nexus_wrapper.file_changed.connect(self.update_nexus_file_structure_view)
         self.verticalLayout.addWidget(self.widget)
-        #self.listView.setModel(self.nexus_wrapper.get_component_list())
 
         self.widget.setVisible(True)
 
-        import nexus_constructor.test_components as Cp
-        Sample = Cp.Component("Sample")
-        Detector = Cp.Cylinder(Name="Detector1")
-        Monitor = Cp.Cylinder(Name="Monitor1")
-        Detector.Transformations.append(Cp.Translation("DetMovement", Detector))
-        Detector.Transformations.append(Cp.Rotation("DetRotation", Detector))
-        MonTrans = Cp.Translation("MonMovement", Monitor)
-        MonTrans.X = 0.5
-        MonTrans.Y = -10
-        MonTrans.Z = 5
-        Monitor.Transformations.append(MonTrans)
-        Components = [Sample, Detector, Monitor]
-
-        self.component_model = ComponentTreeModel(Components)
+        component_list = generate_wrapper_component_list(self.nexus_wrapper.get_component_list())
+        self.component_model = ComponentTreeModel(component_list)
 
         self.componentTreeView.setDragEnabled(True)
         self.componentTreeView.setAcceptDrops(True)
@@ -68,6 +57,20 @@ class MainWindow(Ui_MainWindow):
         self.componentTreeView.updateEditorGeometries()
         self.componentTreeView.updateGeometries()
         self.componentTreeView.updateGeometry()
+
+        self.component_tool_bar = QToolBar("Actions", self.componentsTab)
+        self.new_component_action = QAction(QIcon("ui/new_component.png"),"New component", self.componentsTab)
+        self.new_component_action.triggered.connect(self.show_add_component_window)
+        self.component_tool_bar.addAction(self.new_component_action)
+        self.new_translation_action = QAction(QIcon("ui/new_translation.png"), "New translation", self.componentsTab)
+        self.component_tool_bar.addAction(self.new_translation_action)
+        self.new_rotation_action = QAction(QIcon("ui/new_rotation.png"), "New rotation", self.componentsTab)
+        self.component_tool_bar.addAction(self.new_rotation_action)
+        self.duplicate_action = QAction(QIcon("ui/duplicate.png"), "Duplicate", self.componentsTab)
+        self.component_tool_bar.addAction(self.duplicate_action)
+        self.delete_action = QAction(QIcon("ui/delete.png"), "Delete", self.componentsTab)
+        self.component_tool_bar.addAction(self.delete_action)
+        self.componentsTabLayout.insertWidget(0, self.component_tool_bar)
 
 
     def update_nexus_file_structure_view(self, nexus_file):

@@ -5,7 +5,7 @@ from PySide2.QtCore import QAbstractItemModel
 from PySide2.QtCore import QAbstractItemModel, QModelIndex, Qt, QMimeData
 import PySide2
 import typing
-import nexus_constructor.test_components as Cp
+import nexus_constructor.component_wrapper as Cp
 
 class ComponentTreeModel(QAbstractItemModel):
     def __init__(self, data, parent=None):
@@ -84,7 +84,7 @@ class ComponentTreeModel(QAbstractItemModel):
         if type(parentItem) is list or type(parentItem) is Cp.TransformationList:
             childItem = parentItem[row]
         elif issubclass(type(parentItem), Cp.Component):
-            childItem = parentItem.Transformations
+            childItem = parentItem.transformations
         if childItem is not None:
             return self.createIndex(row, column, childItem)
         else:
@@ -101,7 +101,7 @@ class ComponentTreeModel(QAbstractItemModel):
             parentItem = childItem.parent
             return self.createIndex(self.rootItem.index(parentItem), 0, parentItem)
         elif issubclass(type(childItem), Cp.Transformation):
-            return self.createIndex(0, 0, childItem.Parent.Transformations)
+            return self.createIndex(0, 0, childItem.Parent.transformations)
         if parentItem == self.rootItem:
             return QModelIndex()
 
@@ -123,14 +123,3 @@ class ComponentTreeModel(QAbstractItemModel):
         elif issubclass(type(parentItem), Cp.Component):
             return 1
         return 0
-
-if __name__ == '__main__':
-    Sample = Cp.Component("Sample")
-    Detector = Cp.Cylinder(Name = "Detector1")
-    Detector.Transformations.append(Cp.Translation("DetMovement", Detector))
-    Detector.Transformations.append(Cp.Rotation("DetRotation", Detector))
-    ComponentList = []
-    ComponentList.append(Sample)
-    ComponentList.append(Detector)
-
-    Model = ComponentTreeModel(Sample)
