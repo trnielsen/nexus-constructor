@@ -43,7 +43,7 @@ class MainWindow(Ui_MainWindow):
 
         self.widget.setVisible(True)
 
-        component_list = generate_wrapper_component_list(self.nexus_wrapper.get_component_list())
+        component_list = self.nexus_wrapper.get_component_list()
         self.component_model = ComponentTreeModel(component_list)
 
         self.componentTreeView.setDragEnabled(True)
@@ -75,10 +75,12 @@ class MainWindow(Ui_MainWindow):
     def update_nexus_file_structure_view(self, nexus_file):
         self.treemodel.clear()
         self.treemodel.insertH5pyObject(nexus_file)
+        self.component_model.updateModel()
 
     def save_to_nexus_file(self):
         filename = file_dialog(True, "Save Nexus File", NEXUS_FILE_TYPES)
         self.nexus_wrapper.save_file(filename)
+
 
     def save_to_filewriter_json(self):
         filename = file_dialog(True, "Save JSON File", JSON_FILE_TYPES)

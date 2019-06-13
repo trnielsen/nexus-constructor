@@ -66,6 +66,10 @@ class ComponentTreeModel(QAbstractItemModel):
                 return True
         return False
 
+    def updateModel(self):
+        self.dataChanged.emit(QModelIndex(), QModelIndex())
+        self.layoutChanged.emit()
+
     def dropEvent(self, event: PySide2.QtGui.QDropEvent):
         print("Done dropping")
 
@@ -104,8 +108,8 @@ class ComponentTreeModel(QAbstractItemModel):
             return self.createIndex(0, 0, childItem.Parent.transformations)
         if parentItem == self.rootItem:
             return QModelIndex()
-
-        return self.createIndex(parentItem.row(), 0, parentItem)
+        print("Error")
+        return QModelIndex()
 
     def rowCount(self, parent):
         if parent.column() > 0:

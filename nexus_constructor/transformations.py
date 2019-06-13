@@ -4,9 +4,9 @@ from PySide2.QtGui import QVector3D
 
 @attr.s
 class Transformation:
+    parent = attr.ib(type=list)
     name = attr.ib(str)
     type = "Transformation"
-
 
 def validate_nonzero_vector(instance, attribute, vector: QVector3D):
     """

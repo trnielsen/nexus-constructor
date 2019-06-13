@@ -46,6 +46,6 @@ class Component(object):
         self.transformations = TransformationList(self)
 
     def __str__(self):
-        return "{} ({})".format(self.original.component_type.value, self.original.component_type.name)
+        return "{} ({})".format(self.original.name, self.original.nx_class)
 
 
