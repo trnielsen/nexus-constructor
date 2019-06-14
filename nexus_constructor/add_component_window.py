@@ -1,57 +1,27 @@
 from enum import Enum
 
-from PySide2.QtCore import QUrl, Signal, QObject
-from PySide2.QtWidgets import QDialogButtonBox
+from PySide2.QtCore import QUrl
 from nexus_constructor.qml_models.geometry_models import (
     CylinderModel,
     OFFModel,
     NoShapeModel,
 )
-from PySide2.QtGui import QValidator
 from ui.add_component import Ui_AddComponentDialog
 from nexus_constructor.component_type import (
     make_dictionary_of_class_definitions,
     PIXEL_COMPONENT_TYPES,
 )
-from nexus_constructor.validators import UnitValidator, NameValidator
+from nexus_constructor.validators import (
+    UnitValidator,
+    NameValidator,
+    GeometryFileValidator,
+    GEOMETRY_FILE_TYPES,
+    OkValidator,
+)
 from nexus_constructor.nexus_wrapper import NexusWrapper
 from nexus_constructor.utils import file_dialog, validate_line_edit
 import os
 from functools import partial
-
-# TODO: stop enter closing the dialog
-GEOMETRY_FILE_TYPES = {"OFF Files": ["off", "OFF"], "STL Files": ["stl", "STL"]}
-
-
-class FileValidator(QValidator):
-    """
-    Validator to ensure file exists and is the correct file type.
-    """
-
-    def __init__(self, file_types):
-        """
-
-        :param file_types:
-        """
-        super().__init__()
-        self.file_types = file_types
-
-    def validate(self, input: str, pos: int):
-        if not input:
-            self.isValid.emit(False)
-            return QValidator.Intermediate
-        if not os.path.isfile(input):
-            self.isValid.emit(False)
-            return QValidator.Intermediate
-        for suffixes in GEOMETRY_FILE_TYPES.values():
-            for suff in suffixes:
-                if input.endswith(f".{suff}"):
-                    self.isValid.emit(True)
-                    return QValidator.Acceptable
-        self.isValid.emit(False)
-        return QValidator.Invalid
-
-    isValid = Signal(bool)
 
 
 class GeometryType(Enum):
@@ -60,58 +30,12 @@ class GeometryType(Enum):
     MESH = 3
 
 
-class OkValidator(QObject):
-    """
-    Validator to enable the OK button. Several criteria have to be met before this can occur depending on the geometry type.
-    """
-
-    def __init__(self, no_geometry_button, mesh_button):
-        super().__init__()
-        self.name_is_valid = False
-        self.file_is_valid = False
-        self.units_are_valid = False
-        self.no_geometry_button = no_geometry_button
-        self.mesh_button = mesh_button
-
-    def set_name_valid(self, is_valid):
-        self.name_is_valid = is_valid
-        print("Name: {}".format(self.name_is_valid))
-        self.validate_ok()
-
-    def set_file_valid(self, is_valid):
-        self.file_is_valid = is_valid
-        print("File: {}".format(self.file_is_valid))
-        self.validate_ok()
-
-    def set_units_valid(self, is_valid):
-        self.units_are_valid = is_valid
-        print("Units: {}".format(self.units_are_valid))
-        self.validate_ok()
-
-    def validate_ok(self):
-        """
-        Validates the fields in order to dictate whether the OK button should be disabled or enabled.
-        :return: None, but emits the isValid signal.
-        """
-        unacceptable = [
-            not self.name_is_valid,
-            not self.no_geometry_button.isChecked() and not self.units_are_valid,
-            self.mesh_button.isChecked() and not self.file_is_valid,
-        ]
-
-        print("Is valid {}".format(unacceptable))
-        self.isValid.emit(not any(unacceptable))
-
-    # Signal to indicate that the fields are valid or invalid. False: invalid.
-    isValid = Signal(bool)
-
-
 class AddComponentDialog(Ui_AddComponentDialog):
     def __init__(self, nexus_wrapper: NexusWrapper):
         super(AddComponentDialog, self).__init__()
         self.nexus_wrapper = nexus_wrapper
         self.geometry_model = None
-        self.component_types = make_dictionary_of_class_definitions(
+        self.nx_classes = make_dictionary_of_class_definitions(
             os.path.abspath(os.path.join(os.curdir, "definitions"))
         )
 
@@ -120,10 +44,10 @@ class AddComponentDialog(Ui_AddComponentDialog):
         super().setupUi(parent_dialog)
 
         # Connect the button calls with functions
-        self.buttonBox.button(QDialogButtonBox.Ok).clicked.connect(self.on_ok)
+        self.buttonBox.clicked.connect(self.on_ok)
 
         # Disable by default as component name will be missing at the very least.
-        self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
+        self.buttonBox.setEnabled(False)
 
         # Set default URL to nexus base classes in web view
         self.webEngineView.setUrl(
@@ -135,9 +59,7 @@ class AddComponentDialog(Ui_AddComponentDialog):
         self.ok_validator = OkValidator(
             self.noGeometryRadioButton, self.meshRadioButton
         )
-        self.ok_validator.isValid.connect(
-            self.buttonBox.button(QDialogButtonBox.Ok).setEnabled
-        )
+        self.ok_validator.is_valid.connect(self.buttonBox.setEnabled)
 
         self.meshRadioButton.clicked.connect(self.show_mesh_fields)
         self.CylinderRadioButton.clicked.connect(self.show_cylinder_fields)
@@ -153,15 +75,13 @@ class AddComponentDialog(Ui_AddComponentDialog):
             ]
         ]
 
-        self.fileLineEdit.setValidator(FileValidator(GEOMETRY_FILE_TYPES))
-        self.fileLineEdit.validator().isValid.connect(
+        self.fileLineEdit.setValidator(GeometryFileValidator(GEOMETRY_FILE_TYPES))
+        self.fileLineEdit.validator().is_valid.connect(
             partial(validate_line_edit, self.fileLineEdit)
         )
-        self.fileLineEdit.validator().isValid.connect(self.ok_validator.set_file_valid)
+        self.fileLineEdit.validator().is_valid.connect(self.ok_validator.set_file_valid)
 
-        self.componentTypeComboBox.currentIndexChanged.connect(
-            self.on_component_type_change
-        )
+        self.componentTypeComboBox.currentIndexChanged.connect(self.on_nx_class_changed)
 
         # Set default geometry type and show the related fields.
         self.noGeometryRadioButton.setChecked(True)
@@ -170,17 +90,17 @@ class AddComponentDialog(Ui_AddComponentDialog):
         name_validator = NameValidator()
         name_validator.list_model = self.nexus_wrapper.get_component_list()
         self.nameLineEdit.setValidator(name_validator)
-        self.nameLineEdit.validator().isValid.connect(
+        self.nameLineEdit.validator().is_valid.connect(
             partial(validate_line_edit, self.nameLineEdit)
         )
 
         validate_line_edit(self.nameLineEdit, False)
         validate_line_edit(self.fileLineEdit, False)
 
-        self.nameLineEdit.validator().isValid.connect(self.ok_validator.set_name_valid)
+        self.nameLineEdit.validator().is_valid.connect(self.ok_validator.set_name_valid)
 
         self.unitsLineEdit.setValidator(UnitValidator())
-        self.unitsLineEdit.validator().isValid.connect(
+        self.unitsLineEdit.validator().is_valid.connect(
             partial(
                 validate_line_edit,
                 self.unitsLineEdit,
@@ -188,13 +108,16 @@ class AddComponentDialog(Ui_AddComponentDialog):
                 tooltip_on_accept="Units Valid",
             )
         )
-        self.unitsLineEdit.validator().isValid.connect(
+        self.unitsLineEdit.validator().is_valid.connect(
             self.ok_validator.set_units_valid
         )
 
-        self.componentTypeComboBox.addItems(list(self.component_types.keys()))
+        self.componentTypeComboBox.addItems(list(self.nx_classes.keys()))
 
-    def on_component_type_change(self):
+        # Validate the default value set by the UI
+        self.unitsLineEdit.validator().validate(self.unitsLineEdit.text(), 0)
+
+    def on_nx_class_changed(self):
         self.webEngineView.setUrl(
             QUrl(
                 f"http://download.nexusformat.org/sphinx/classes/base_classes/{self.componentTypeComboBox.currentText()}.html"
@@ -222,7 +145,7 @@ class AddComponentDialog(Ui_AddComponentDialog):
     def show_no_geometry_fields(self):
         self.geometryOptionsBox.setVisible(False)
         if self.nameLineEdit.text():
-            self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(True)
+            self.buttonBox.setEnabled(True)
 
     def show_mesh_fields(self):
         self.geometryOptionsBox.setVisible(True)
@@ -251,9 +174,9 @@ class AddComponentDialog(Ui_AddComponentDialog):
         return geometry_model
 
     def on_ok(self):
-        component_type = self.componentTypeComboBox.currentText()
+        nx_class = self.componentTypeComboBox.currentText()
         component_name = self.nameLineEdit.text()
         description = self.descriptionPlainTextEdit.text()
         self.nexus_wrapper.add_component(
-            component_type, component_name, description, self.generate_geometry_model()
+            nx_class, component_name, description, self.generate_geometry_model()
         )
