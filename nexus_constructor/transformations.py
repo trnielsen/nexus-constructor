@@ -4,7 +4,7 @@ from PySide2.QtGui import QVector3D
 
 @attr.s
 class Transformation:
-    parent = attr.ib(type=list)
+    parent = attr.ib(default=None)
     name = attr.ib(str)
     type = "Transformation"
 

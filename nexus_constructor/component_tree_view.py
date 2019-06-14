@@ -2,9 +2,10 @@
 
 from PySide2.QtCore import Qt, QSize, QPoint
 from PySide2.QtWidgets import QApplication, QTreeView, QHBoxLayout, QStyledItemDelegate, QFrame, QPushButton, QVBoxLayout, QSizePolicy, QLabel, QLineEdit
-from nexus_constructor.component_tree_model import *
-from nexus_constructor.component_wrapper import *
+from nexus_constructor.component_tree_model import ComponentInfo
+from nexus_constructor.component import Component, TransformationsList
 from PySide2.QtGui import QPixmap, QRegion
+import PySide2.QtGui
 
 class RotateSettingsFrame(QFrame):
     def __init__(self, data, parent):
@@ -84,7 +85,7 @@ class TranslateSettingsFrame(QFrame):
         self.data.Z = self.z_field.text()
 
 class ComponentEditorDelegate(QStyledItemDelegate):
-    SettingsFrameMap = {Rotation:RotateSettingsFrame, Translation:TranslateSettingsFrame}
+    SettingsFrameMap = {} #{Rotation:RotateSettingsFrame, Translation:TranslateSettingsFrame}
     frameSize = QSize(30, 10)
 
     def __init__(self, parent):
@@ -104,43 +105,46 @@ class ComponentEditorDelegate(QStyledItemDelegate):
         frame.layout = QVBoxLayout()
         frame.layout.setContentsMargins(0,0,0,0)
         frame.setLayout(frame.layout)
-        if issubclass(type(value), Cp.Component):
-            frame.label = QLabel(str(value), frame)
+        if issubclass(type(value), Component):
+            frame.label = QLabel("{} ({})".format(value.name, value.nx_class), frame)
             frame.layout.addWidget(frame.label)
-        elif type(value) is Cp.TransformationList:
-            frame.label = QLabel(str(value), frame)
+        elif type(value) is TransformationsList:
+            frame.label = QLabel("Transformations", frame)
             frame.layout.addWidget(frame.label)
-        elif issubclass(type(value), Cp.Transformation):
-            frame.editor_header_layout = QHBoxLayout()
-            label = QLabel("Name", frame)
-            label.setSizePolicy(SizePolicy)
-            frame.editor_header_layout.addWidget(label)
-            frame.editor_header_layout.setContentsMargins(0, 0, 0, 0)
-            frame.component_name = QLineEdit(value.Name, frame)
-            frame.component_name.setSizePolicy(AltSizePolicy)
-            line = QFrame(frame)
-            line.setFrameShape(QFrame.VLine)
-            line.setFrameShadow(QFrame.Sunken)
-            frame.editor_header_layout.addWidget(frame.component_name)
-            frame.editor_header_layout.addWidget(line)
-            frame.edit_btn = QPushButton("Edit", frame)
-            frame.edit_btn.setSizePolicy(SizePolicy)
-            frame.editor_header_layout.addWidget(frame.edit_btn)
-            frame.layout.addLayout(frame.editor_header_layout)
-            frame.editor_header_layout.setEnabled(False)
-            line2 = QFrame(frame)
-            line2.setFrameShape(QFrame.HLine)
-            line2.setFrameShadow(QFrame.Sunken)
-            line2.setContentsMargins(0, 0, 0, 0)
-            frame.setContentsMargins(0, 0, 0, 0)
-            frame.layout.setContentsMargins(0, 0, 0, 0)
-            frame.layout.addWidget(line2)
-            frame.edit_frame = self.SettingsFrameMap[type(value)](value, frame)
-            frame.layout.addWidget(frame.edit_frame, Qt.AlignTop)
-            frame.edit_frame.setEnabled(False)
-            frame.component_name.setEnabled(False)
-        else:
-            raise Exception("Unknown element type in tree view.")
+        elif type(value) is ComponentInfo:
+            frame.label = QLabel("Component settings", frame)
+            frame.layout.addWidget(frame.label)
+        # elif issubclass(type(value), Cp.Transformation):
+        #     frame.editor_header_layout = QHBoxLayout()
+        #     label = QLabel("Name", frame)
+        #     label.setSizePolicy(SizePolicy)
+        #     frame.editor_header_layout.addWidget(label)
+        #     frame.editor_header_layout.setContentsMargins(0, 0, 0, 0)
+        #     frame.component_name = QLineEdit(value.Name, frame)
+        #     frame.component_name.setSizePolicy(AltSizePolicy)
+        #     line = QFrame(frame)
+        #     line.setFrameShape(QFrame.VLine)
+        #     line.setFrameShadow(QFrame.Sunken)
+        #     frame.editor_header_layout.addWidget(frame.component_name)
+        #     frame.editor_header_layout.addWidget(line)
+        #     frame.edit_btn = QPushButton("Edit", frame)
+        #     frame.edit_btn.setSizePolicy(SizePolicy)
+        #     frame.editor_header_layout.addWidget(frame.edit_btn)
+        #     frame.layout.addLayout(frame.editor_header_layout)
+        #     frame.editor_header_layout.setEnabled(False)
+        #     line2 = QFrame(frame)
+        #     line2.setFrameShape(QFrame.HLine)
+        #     line2.setFrameShadow(QFrame.Sunken)
+        #     line2.setContentsMargins(0, 0, 0, 0)
+        #     frame.setContentsMargins(0, 0, 0, 0)
+        #     frame.layout.setContentsMargins(0, 0, 0, 0)
+        #     frame.layout.addWidget(line2)
+        #     frame.edit_frame = self.SettingsFrameMap[type(value)](value, frame)
+        #     frame.layout.addWidget(frame.edit_frame, Qt.AlignTop)
+        #     frame.edit_frame.setEnabled(False)
+        #     frame.component_name.setEnabled(False)
+        # else:
+        #     raise Exception("Unknown element type in tree view.")
 
         return frame
 

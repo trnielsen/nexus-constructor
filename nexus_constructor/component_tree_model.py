@@ -1,15 +1,19 @@
 #!/usr/bin/env python
-
-from nexus_constructor.component_tree_model import *
-from PySide2.QtCore import QAbstractItemModel
+from PySide2.QtCore import QAbstractItemModel, QObject
 from PySide2.QtCore import QAbstractItemModel, QModelIndex, Qt, QMimeData
-import PySide2
+import PySide2.QtGui
 import typing
-import nexus_constructor.component_wrapper as Cp
+from nexus_constructor.component import Component, TransformationsList
+from nexus_constructor.transformations import Transformation
+
+class ComponentInfo(object):
+    def __init__(self, parent):
+        super().__init__()
+        self.parent = parent
 
 class ComponentTreeModel(QAbstractItemModel):
     def __init__(self, data, parent=None):
-        super(ComponentTreeModel, self).__init__(parent)
+        super().__init__(parent)
         self.rootItem = data
 
     def columnCount(self, parent):
@@ -27,11 +31,13 @@ class ComponentTreeModel(QAbstractItemModel):
     def flags(self, index):
         if not index.isValid():
             return Qt.NoItemFlags
-        item = index.internalPointer()
-        if issubclass(type(item), Cp.Component):
-            return Qt.ItemIsEnabled | Qt.ItemIsSelectable
-        elif type(item) is Cp.TransformationList:
+        parentItem = index.internalPointer()
+        if issubclass(type(parentItem), Component):
             return Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsDropEnabled
+        elif issubclass(type(parentItem), ComponentInfo):
+            return Qt.ItemIsEnabled
+        elif type(parentItem) is TransformationsList:
+            return Qt.ItemIsEnabled | Qt.ItemIsDropEnabled | Qt.ItemIsSelectable
         return Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsEditable | Qt.ItemIsDragEnabled
 
 
@@ -81,49 +87,61 @@ class ComponentTreeModel(QAbstractItemModel):
             return QModelIndex()
 
         if not parent.isValid():
-            parentItem = self.rootItem
-        else:
-            parentItem = parent.internalPointer()
+            return self.createIndex(row, 0, self.rootItem[row])
 
-        if type(parentItem) is list or type(parentItem) is Cp.TransformationList:
-            childItem = parentItem[row]
-        elif issubclass(type(parentItem), Cp.Component):
-            childItem = parentItem.transformations
-        if childItem is not None:
-            return self.createIndex(row, column, childItem)
-        else:
-            return QModelIndex()
+        parentItem = parent.internalPointer()
+
+        if type(parentItem) is Component:
+            if row == 0:
+                if not hasattr(parentItem, "component_info"):
+                    parentItem.component_info = ComponentInfo(parentItem)
+                return self.createIndex(0, 0, parentItem.component_info)
+            elif row == 1:
+                return self.createIndex(1, 0, parentItem.transforms)
+            else:
+                return QModelIndex()
+        elif type(parentItem) is TransformationsList:
+            return self.createIndex(row, 0, parentItem[row])
+
+        #
+        # if type(parentItem) is list or type(parentItem) is Cp.TransformationList:
+        #     childItem = parentItem[row]
+        # elif issubclass(type(parentItem), Cp.Component):
+        #     childItem = parentItem.transformations
+        # if childItem is not None:
+        #     return self.createIndex(row, column, childItem)
+        raise RuntimeError("Unable to find element.")
 
     def parent(self, index):
+        # list.index uses the comparison operator to find an item but we want to find the actual object (pointer)
+        # is there a simple pythonic way to fix this or should we add some attribute to make sure that every
+        # item is unique?
         if not index.isValid():
             return QModelIndex()
-
-        childItem = index.internalPointer()
-        if issubclass(type(childItem), Cp.Component):
-            parentItem = self.rootItem
-        elif type(childItem) is Cp.TransformationList:
-            parentItem = childItem.parent
-            return self.createIndex(self.rootItem.index(parentItem), 0, parentItem)
-        elif issubclass(type(childItem), Cp.Transformation):
-            return self.createIndex(0, 0, childItem.Parent.transformations)
-        if parentItem == self.rootItem:
+        parentItem = index.internalPointer()
+        if type(parentItem) is Component:
             return QModelIndex()
-        print("Error")
-        return QModelIndex()
+        elif type(parentItem) is TransformationsList:
+            return self.createIndex(self.rootItem.index(parentItem.parent), 0, parentItem.parent)
+        elif type(parentItem) is ComponentInfo:
+            return self.createIndex(self.rootItem.index(parentItem.parent), 0, parentItem.parent)
+        elif issubclass(type(parentItem), Transformation):
+            return self.createIndex(1, 0, parentItem.parent)
+        # if parentItem == self.rootItem:
+        #     return QModelIndex()
+        raise RuntimeError("Unknown element type.")
 
     def rowCount(self, parent):
-        if parent.column() > 0:
-            return 0
-
         if not parent.isValid():
-            parentItem = self.rootItem
-        else:
-            parentItem = parent.internalPointer()
+            return len(self.rootItem)
 
-        if type(parentItem) is list:
+        parentItem = parent.internalPointer()
+
+        if type(parentItem) is Component:
+            return 2
+        elif type(parentItem) is TransformationsList:
             return len(parentItem)
-        elif type(parentItem) is Cp.TransformationList:
-            return len(parentItem)
-        elif issubclass(type(parentItem), Cp.Component):
-            return 1
-        return 0
+        elif issubclass(type(parentItem), Transformation):
+            return 0
+        elif type(parentItem) is ComponentInfo:
+            return 0

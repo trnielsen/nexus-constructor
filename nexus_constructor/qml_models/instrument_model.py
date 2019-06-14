@@ -225,9 +225,6 @@ class InstrumentModel(QAbstractListModel):
                 pixel_data=None
                 if pixel_model is None
                 else pixel_model.get_pixel_model(),
-                transforms=[]
-                if transform_model is None
-                else transform_model.transforms,
             )
         )
 

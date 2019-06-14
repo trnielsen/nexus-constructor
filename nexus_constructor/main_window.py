@@ -7,8 +7,6 @@ from ui.main_window import Ui_MainWindow
 import silx.gui.hdf5
 from nexus_constructor.component_tree_view import ComponentEditorDelegate
 from nexus_constructor.component_tree_model import ComponentTreeModel
-from nexus_constructor.component_wrapper import generate_wrapper_component_list
-
 
 from nexus_constructor.nexus_filewriter_json import writer
 
@@ -44,7 +42,7 @@ class MainWindow(Ui_MainWindow):
         self.widget.setVisible(True)
 
         component_list = self.nexus_wrapper.get_component_list()
-        self.component_model = ComponentTreeModel(component_list)
+        self.component_model = ComponentTreeModel(component_list.components)
 
         self.componentTreeView.setDragEnabled(True)
         self.componentTreeView.setAcceptDrops(True)
