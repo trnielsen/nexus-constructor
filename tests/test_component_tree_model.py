@@ -12,14 +12,14 @@ def get_component():
 def test_number_of_components_0():
     data_under_test = []
     under_test = ComponentTreeModel(data_under_test)
-    test_index = under_test.createIndex(0, 0, data_under_test)
+    test_index = QModelIndex()
     assert under_test.rowCount(test_index) == 0
 
 def test_number_of_components_1():
     data_under_test = [get_component(), ]
     under_test = ComponentTreeModel(data_under_test)
 
-    test_index = under_test.createIndex(0, 0, data_under_test)
+    test_index = QModelIndex()
 
     assert under_test.rowCount(test_index) == 1
 
@@ -27,7 +27,7 @@ def test_number_of_components_2():
     data_under_test = [get_component(), get_component()]
     under_test = ComponentTreeModel(data_under_test)
 
-    test_index = under_test.createIndex(0, 0, data_under_test)
+    test_index = QModelIndex()
 
     assert under_test.rowCount(test_index) == 2
 
