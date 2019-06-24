@@ -9,6 +9,7 @@ from nexus_constructor.component_tree_view import ComponentEditorDelegate
 from nexus_constructor.component_tree_model import ComponentTreeModel
 
 from nexus_constructor.nexus_filewriter_json import writer
+import os
 
 NEXUS_FILE_TYPES = {"NeXus Files": ["nxs", "nex", "nx5"]}
 JSON_FILE_TYPES = {"JSON Files": ["json", "JSON"]}
@@ -38,6 +39,10 @@ class MainWindow(Ui_MainWindow):
         self.treemodel.insertH5pyObject(self.nexus_wrapper.nexus_file)
         self.nexus_wrapper.file_changed.connect(self.update_nexus_file_structure_view)
         self.verticalLayout.addWidget(self.widget)
+
+        self.nexus_wrapper.component_added.connect(self.sceneWidget.add_component)
+
+        self.set_up_warning_window()
 
         self.widget.setVisible(True)
 
@@ -69,6 +74,26 @@ class MainWindow(Ui_MainWindow):
         self.component_tool_bar.addAction(self.delete_action)
         self.componentsTabLayout.insertWidget(0, self.component_tool_bar)
 
+    def set_up_warning_window(self):
+        """
+        Sets up the warning dialog that is shown when the definitions submodule has not been cloned.
+        :return:
+        """
+        definitions_dir = os.path.join(os.curdir, "definitions")
+
+        # Will contain .git even if missing so check that it does not contain just that file.
+        if not os.path.exists(definitions_dir) or len(os.listdir(definitions_dir)) <= 1:
+            self.warning_window = QDialog()
+            self.warning_window.setWindowTitle("NeXus definitions missing")
+            self.warning_window.setLayout(QGridLayout())
+            self.warning_window.layout().addWidget(
+                QLabel(
+                    "Warning: NeXus definitions are missing. Did you forget to clone the submodules?\n run git submodule update --init "
+                )
+            )
+            # Set add component button to disabled, as it wouldn't work without the definitions.
+            self.pushButton.setEnabled(False)
+            self.warning_window.show()
 
     def update_nexus_file_structure_view(self, nexus_file):
         self.treemodel.clear()
