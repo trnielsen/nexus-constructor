@@ -4,85 +4,10 @@ from PySide2.QtCore import Qt, QSize, QPoint
 from PySide2.QtWidgets import QApplication, QTreeView, QHBoxLayout, QStyledItemDelegate, QFrame, QPushButton, QVBoxLayout, QSizePolicy, QLabel, QLineEdit
 from nexus_constructor.component_tree_model import ComponentInfo
 from nexus_constructor.component import Component, TransformationsList
+from nexus_constructor.transformations import Transformation
 from PySide2.QtGui import QPixmap, QRegion
 import PySide2.QtGui
-
-class RotateSettingsFrame(QFrame):
-    def __init__(self, data, parent):
-        self.data = data
-        super().__init__(parent)
-        self.main_layout = QVBoxLayout()
-        self.pos_layout = QHBoxLayout()
-        self.x_label = QLabel("x:", self)
-        self.y_label = QLabel("y:", self)
-        self.z_label = QLabel("z:", self)
-        self.x_field = QLineEdit(str(data.X), self)
-        self.y_field = QLineEdit(str(data.Y), self)
-        self.z_field = QLineEdit(str(data.Z), self)
-        self.setLayout(self.main_layout)
-        rot_label = QLabel("Rotation", self)
-        self.main_layout.addWidget(rot_label)
-        self.main_layout.addLayout(self.pos_layout)
-        self.pos_layout.addWidget(self.x_label)
-        self.pos_layout.addWidget(self.x_field)
-        self.pos_layout.addWidget(self.y_label)
-        self.pos_layout.addWidget(self.y_field)
-        self.pos_layout.addWidget(self.z_label)
-        self.pos_layout.addWidget(self.z_field)
-        self.angle_layout = QHBoxLayout()
-        self.angle_label = QLabel("angle (degrees):", self)
-        self.angle_field = QLineEdit(str(data.Angle), self)
-        self.angle_layout.addWidget(self.angle_label)
-        self.angle_layout.addWidget(self.angle_field)
-        self.main_layout.addLayout(self.angle_layout)
-        self.x_field.editingFinished.connect(self.XValChanged)
-        self.y_field.editingFinished.connect(self.YValChanged)
-        self.z_field.editingFinished.connect(self.ZValChanged)
-
-    def XValChanged(self):
-            self.data.X = self.x_field.text()
-
-    def YValChanged(self):
-            self.data.Y = self.y_field.text()
-
-    def ZValChanged(self):
-            self.data.Z = self.z_field.text()
-
-class TranslateSettingsFrame(QFrame):
-    def __init__(self, data, parent):
-        self.data = data
-        super().__init__(parent)
-        self.main_layout = QVBoxLayout()
-        self.main_layout.setContentsMargins(0, 0, 0, 0)
-        self.setContentsMargins(0, 0, 0, 0)
-        self.pos_layout = QHBoxLayout()
-        self.x_label = QLabel("x:", self)
-        self.y_label = QLabel("y:", self)
-        self.z_label = QLabel("z:", self)
-        self.x_field = QLineEdit(str(data.X), self)
-        self.y_field = QLineEdit(str(data.Y), self)
-        self.z_field = QLineEdit(str(data.Z), self)
-        self.setLayout(self.main_layout)
-        self.main_layout.addWidget(QLabel("Translation", self))
-        self.main_layout.addLayout(self.pos_layout)
-        self.pos_layout.addWidget(self.x_label)
-        self.pos_layout.addWidget(self.x_field)
-        self.pos_layout.addWidget(self.y_label)
-        self.pos_layout.addWidget(self.y_field)
-        self.pos_layout.addWidget(self.z_label)
-        self.pos_layout.addWidget(self.z_field)
-        self.x_field.editingFinished.connect(self.XValChanged)
-        self.y_field.editingFinished.connect(self.YValChanged)
-        self.z_field.editingFinished.connect(self.ZValChanged)
-
-    def XValChanged(self):
-        self.data.X = self.x_field.text()
-
-    def YValChanged(self):
-        self.data.Y = self.y_field.text()
-
-    def ZValChanged(self):
-        self.data.Z = self.z_field.text()
+from ui.transformations import Ui_TransformationFrame
 
 class ComponentEditorDelegate(QStyledItemDelegate):
     SettingsFrameMap = {} #{Rotation:RotateSettingsFrame, Translation:TranslateSettingsFrame}
@@ -114,7 +39,11 @@ class ComponentEditorDelegate(QStyledItemDelegate):
         elif type(value) is ComponentInfo:
             frame.label = QLabel("Component settings", frame)
             frame.layout.addWidget(frame.label)
-        # elif issubclass(type(value), Cp.Transformation):
+        elif issubclass(type(value), Transformation):
+            frame.transformation_frame = Ui_TransformationFrame()
+            temp_frame = QFrame(frame)
+            frame.transformation_frame.setupUi(temp_frame)
+            frame.layout.addWidget(temp_frame, Qt.AlignTop)
         #     frame.editor_header_layout = QHBoxLayout()
         #     label = QLabel("Name", frame)
         #     label.setSizePolicy(SizePolicy)
