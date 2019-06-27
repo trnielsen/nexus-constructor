@@ -112,6 +112,11 @@ class NexusWrapper(QObject):
 
         self._emit_file()
 
+    def del_component(self, component_name):
+        instrument_group = self.entry_group["instrument"]
+        del instrument_group[component_name]
+
+        self.components_list_model.remove_component()
 
 def convert_name_with_spaces(component_name):
     return component_name.replace(" ", "_")

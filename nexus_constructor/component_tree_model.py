@@ -145,3 +145,4 @@ class ComponentTreeModel(QAbstractItemModel):
             return 0
         elif type(parentItem) is ComponentInfo:
             return 0
+        raise RuntimeError("Unknown element type.")

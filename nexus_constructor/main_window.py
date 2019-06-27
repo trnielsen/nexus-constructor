@@ -11,6 +11,9 @@ from nexus_constructor.component_tree_model import ComponentTreeModel
 from nexus_constructor.nexus_filewriter_json import writer
 import os
 
+from nexus_constructor.component import Component, TransformationsList
+from nexus_constructor.transformations import Transformation
+
 NEXUS_FILE_TYPES = {"NeXus Files": ["nxs", "nex", "nx5"]}
 JSON_FILE_TYPES = {"JSON Files": ["json", "JSON"]}
 
@@ -59,20 +62,39 @@ class MainWindow(Ui_MainWindow):
         self.componentTreeView.updateEditorGeometries()
         self.componentTreeView.updateGeometries()
         self.componentTreeView.updateGeometry()
+        self.componentTreeView.clicked.connect(self.on_clicked)
 
         self.component_tool_bar = QToolBar("Actions", self.componentsTab)
         self.new_component_action = QAction(QIcon("ui/new_component.png"),"New component", self.componentsTab)
         self.new_component_action.triggered.connect(self.show_add_component_window)
         self.component_tool_bar.addAction(self.new_component_action)
         self.new_translation_action = QAction(QIcon("ui/new_translation.png"), "New translation", self.componentsTab)
+        self.new_translation_action.setEnabled(False)
         self.component_tool_bar.addAction(self.new_translation_action)
         self.new_rotation_action = QAction(QIcon("ui/new_rotation.png"), "New rotation", self.componentsTab)
+        self.new_rotation_action.setEnabled(False)
         self.component_tool_bar.addAction(self.new_rotation_action)
         self.duplicate_action = QAction(QIcon("ui/duplicate.png"), "Duplicate", self.componentsTab)
         self.component_tool_bar.addAction(self.duplicate_action)
+        self.duplicate_action.setEnabled(False)
         self.delete_action = QAction(QIcon("ui/delete.png"), "Delete", self.componentsTab)
+        self.delete_action.setEnabled(False)
         self.component_tool_bar.addAction(self.delete_action)
         self.componentsTabLayout.insertWidget(0, self.component_tool_bar)
+
+    def on_clicked(self, index):
+        indices = self.componentTreeView.selectedIndexes()
+        if len(indices) == 0 or len(indices) != 1:
+            self.delete_action.setEnabled(False)
+            self.duplicate_action.setEnabled(False)
+            self.new_rotation_action.setEnabled(False)
+            self.new_translation_action.setEnabled(False)
+        else:
+            self.delete_action.setEnabled(True)
+            self.duplicate_action.setEnabled(True)
+            self.new_rotation_action.setEnabled(True)
+            self.new_translation_action.setEnabled(True)
+
 
     def set_up_warning_window(self):
         """
