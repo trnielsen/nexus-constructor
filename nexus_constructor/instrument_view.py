@@ -205,12 +205,17 @@ class InstrumentView(QWidget):
         return clear_buffers
 
     def add_component(
-        self, name: str, geometry: OFFGeometry, positions: List[QVector3D] = None
+        self,
+        name: str,
+        geometry: OFFGeometry,
+        transform: Qt3DCore.QTransform,
+        positions: List[QVector3D] = None,
     ):
         """
         Add a component to the instrument view given a name and its geometry.
         :param name: The name of the component.
         :param geometry: The geometry information of the component that is used to create a mesh.
+        :param transform: Describes the position and orientation of the component
         :param positions: Mesh is repeated at each of these positions
         """
         if geometry is None:
@@ -227,6 +232,7 @@ class InstrumentView(QWidget):
             transform.setTranslation(position)
             position_transforms.append(transform)
         self.component_positions[name] = position_transforms
+        self.component_transformations[name] = transform
         # Note, the a list comprehension like below doesn't work (end up with segfault)
         # self.component_positions[name] = [Qt3DCore.QTransform().setTranslation(position) for position in positions]
         self._create_entities(name)
@@ -235,6 +241,13 @@ class InstrumentView(QWidget):
         with DetachedRootEntity(
             self.component_root_entity, self.combined_component_axes_entity
         ):
+            for index, position_transform in enumerate(self.component_positions[name]):
+                transformed_matrix = (
+                    self.component_transformations[name].matrix()
+                    * position_transform.matrix()
+                )
+                self.component_positions[name][index].setMatrix(transformed_matrix)
+
             self.component_entities[name] = [
                 create_qentity(
                     [
