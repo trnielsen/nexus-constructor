@@ -1,6 +1,7 @@
 from collections import OrderedDict
 
 import h5py
+import numpy as np
 from PySide2.QtGui import QVector3D
 from PySide2.QtCore import QUrl, Signal, QObject
 from PySide2.QtWidgets import QListWidgetItem
@@ -46,6 +47,13 @@ from nexus_constructor.component.component import Component
 from nexus_constructor.geometry.geometry_loader import load_geometry
 from nexus_constructor.pixel_data import PixelData, PixelMapping, PixelGrid
 from nexus_constructor.pixel_options import PixelOptions
+
+CHOPPER_DATATYPES = {
+    "slits": np.intc,
+    "radius": np.single,
+    "slit_edges": np.single,
+    "slit_height": np.single,
+}
 
 
 def update_existing_link_field(field: h5py.SoftLink, new_ui_field: FieldWidget):
@@ -299,9 +307,10 @@ class AddComponentDialog(Ui_AddComponentDialog, QObject):
             current_fields.add(widget.name)
 
         missing_fields = REQUIRED_CHOPPER_FIELDS - current_fields
+        present_fields = REQUIRED_CHOPPER_FIELDS.intersection(current_fields)
 
         for field in missing_fields:
-            self.add_field(field)
+            self.add_field(field, CHOPPER_DATATYPES[field])
 
     def clear_previous_mapping_list(self):
         """
@@ -360,7 +369,7 @@ class AddComponentDialog(Ui_AddComponentDialog, QObject):
         new_ui_field.name = field.name.split("/")[-1]
         return new_ui_field
 
-    def add_field(self, name: str = None) -> FieldWidget:
+    def add_field(self, name: str = None, dtype: h5py.Datatype = None) -> FieldWidget:
         item = QListWidgetItem()
         field = FieldWidget(
             self.possible_fields, self.fieldsListWidget, self.instrument
@@ -368,7 +377,12 @@ class AddComponentDialog(Ui_AddComponentDialog, QObject):
         field.something_clicked.connect(partial(self.select_field, item))
         self.nx_class_changed.connect(field.field_name_edit.update_possible_fields)
         item.setSizeHint(field.sizeHint())
-        field.name = name
+
+        if name is not None:
+            field.name = name
+
+        if dtype is not None:
+            field.dtype = dtype
 
         self.fieldsListWidget.addItem(item)
         self.fieldsListWidget.setItemWidget(item, field)
