@@ -17,6 +17,7 @@ from nexus_constructor.component_fields import FieldWidget, add_fields_to_compon
 from nexus_constructor.invalid_field_names import INVALID_FIELD_NAMES
 from nexus_constructor.geometry.disk_chopper.disk_chopper_checker import (
     UserDefinedChopperChecker,
+    REQUIRED_CHOPPER_FIELDS,
 )
 from nexus_constructor.geometry.disk_chopper.disk_chopper_geometry_creator import (
     DiskChopperGeometryCreator,
@@ -286,7 +287,7 @@ class AddComponentDialog(Ui_AddComponentDialog, QObject):
         """
         self.createDiskChopperFieldsButton.setVisible(
             self.noShapeRadioButton.isChecked()
-            and self.componentTypeComboBox.currentText() == "NXdisk_chopper"
+            and self.componentTypeComboBox.currentText() == CHOPPER_CLASS_NAME
         )
 
     def create_disk_chopper_fields(self):
@@ -296,6 +297,11 @@ class AddComponentDialog(Ui_AddComponentDialog, QObject):
         for i in range(self.fieldsListWidget.count()):
             widget = self.fieldsListWidget.itemWidget(self.fieldsListWidget.item(i))
             current_fields.add(widget.name)
+
+        missing_fields = REQUIRED_CHOPPER_FIELDS - current_fields
+
+        for field in missing_fields:
+            self.add_field(field)
 
     def clear_previous_mapping_list(self):
         """
@@ -354,7 +360,7 @@ class AddComponentDialog(Ui_AddComponentDialog, QObject):
         new_ui_field.name = field.name.split("/")[-1]
         return new_ui_field
 
-    def add_field(self) -> FieldWidget:
+    def add_field(self, name: str = None) -> FieldWidget:
         item = QListWidgetItem()
         field = FieldWidget(
             self.possible_fields, self.fieldsListWidget, self.instrument
@@ -362,6 +368,7 @@ class AddComponentDialog(Ui_AddComponentDialog, QObject):
         field.something_clicked.connect(partial(self.select_field, item))
         self.nx_class_changed.connect(field.field_name_edit.update_possible_fields)
         item.setSizeHint(field.sizeHint())
+        field.name = name
 
         self.fieldsListWidget.addItem(item)
         self.fieldsListWidget.setItemWidget(item, field)
