@@ -253,6 +253,17 @@ class AddComponentDialog(Ui_AddComponentDialog, QObject):
         self.CylinderRadioButton.clicked.connect(self.set_pixel_related_changes)
         self.noShapeRadioButton.clicked.connect(self.set_pixel_related_changes)
 
+        self.createDiskChopperFieldsButton.setVisible(False)
+        self.createDiskChopperFieldsButton.clicked.connect(
+            self.create_disk_chopper_fields
+        )
+        self.meshRadioButton.clicked.connect(self.show_disk_chopper_help_button)
+        self.CylinderRadioButton.clicked.connect(self.show_disk_chopper_help_button)
+        self.noShapeRadioButton.clicked.connect(self.show_disk_chopper_help_button)
+        self.componentTypeComboBox.currentIndexChanged.connect(
+            self.show_disk_chopper_help_button
+        )
+
         self.change_pixel_options_visibility()
 
     def set_pixel_related_changes(self):
@@ -268,6 +279,23 @@ class AddComponentDialog(Ui_AddComponentDialog, QObject):
             self.populate_pixel_mapping_if_necessary()
 
         self.update_pixel_input_validity()
+
+    def show_disk_chopper_help_button(self):
+        """
+        Instructs the create disk chopper fields to become visible or invisible.
+        """
+        self.createDiskChopperFieldsButton.setVisible(
+            self.noShapeRadioButton.isChecked()
+            and self.componentTypeComboBox.currentText() == "NXdisk_chopper"
+        )
+
+    def create_disk_chopper_fields(self):
+
+        current_fields = set()
+
+        for i in range(self.fieldsListWidget.count()):
+            widget = self.fieldsListWidget.itemWidget(self.fieldsListWidget.item(i))
+            current_fields.add(widget.name)
 
     def clear_previous_mapping_list(self):
         """

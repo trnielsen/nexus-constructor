@@ -64,7 +64,7 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_4" rowstretch="0" columnstretch="1,1">
       <item row="0" column="0">
-       <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,0,0,0,1">
+       <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,0,0,0,0,1">
         <property name="sizeConstraint">
          <enum>QLayout::SetDefaultConstraint</enum>
         </property>
@@ -126,25 +126,32 @@
            <item>
             <widget class="QRadioButton" name="noShapeRadioButton">
              <property name="text">
-              <string>No Shape</string>
+              <string>&amp;No Shape</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QRadioButton" name="meshRadioButton">
              <property name="text">
-              <string>Mesh</string>
+              <string>&amp;Mesh</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QRadioButton" name="CylinderRadioButton">
              <property name="text">
-              <string>Cylinder</string>
+              <string>C&amp;ylinder</string>
              </property>
             </widget>
            </item>
           </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="createDiskChopperFieldsButton">
+          <property name="text">
+           <string>Create Disk Chopper Fields</string>
+          </property>
          </widget>
         </item>
         <item>
