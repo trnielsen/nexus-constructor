@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'ui/add_component.ui',
 # licensing of 'ui/add_component.ui' applies.
 #
-# Created: Tue Jan 14 14:56:45 2020
+# Created: Thu Jan 16 09:59:26 2020
 #      by: pyside2-uic  running on PySide2 5.13.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -93,9 +93,6 @@ class Ui_AddComponentDialog(object):
         self.CylinderRadioButton.setObjectName("CylinderRadioButton")
         self.horizontalLayout.addWidget(self.CylinderRadioButton)
         self.verticalLayout_2.addWidget(self.shapeTypeBox)
-        self.createDiskChopperFieldsButton = QtWidgets.QPushButton(self.widget)
-        self.createDiskChopperFieldsButton.setObjectName("createDiskChopperFieldsButton")
-        self.verticalLayout_2.addWidget(self.createDiskChopperFieldsButton)
         self.shapeOptionsBox = QtWidgets.QGroupBox(self.widget)
         self.shapeOptionsBox.setObjectName("shapeOptionsBox")
         self.gridLayout_2 = QtWidgets.QGridLayout(self.shapeOptionsBox)
@@ -201,9 +198,12 @@ class Ui_AddComponentDialog(object):
         self.gridLayout_5.addWidget(self.removeFieldPushButton, 0, 1, 1, 1)
         self.fieldsListWidget = QtWidgets.QListWidget(self.fieldsBox)
         self.fieldsListWidget.setObjectName("fieldsListWidget")
-        self.gridLayout_5.addWidget(self.fieldsListWidget, 1, 0, 1, 2)
+        self.gridLayout_5.addWidget(self.fieldsListWidget, 2, 0, 1, 2)
+        self.createDiskChopperFieldsButton = QtWidgets.QPushButton(self.fieldsBox)
+        self.createDiskChopperFieldsButton.setObjectName("createDiskChopperFieldsButton")
+        self.gridLayout_5.addWidget(self.createDiskChopperFieldsButton, 1, 0, 1, 2)
         self.verticalLayout_2.addWidget(self.fieldsBox)
-        self.verticalLayout_2.setStretch(6, 1)
+        self.verticalLayout_2.setStretch(5, 1)
         self.gridLayout_4.addLayout(self.verticalLayout_2, 0, 0, 1, 1)
         self.webEngineView = QWebEngineView(self.widget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
@@ -232,7 +232,6 @@ class Ui_AddComponentDialog(object):
         self.noShapeRadioButton.setText(QtWidgets.QApplication.translate("AddComponentDialog", "&No Shape", None, -1))
         self.meshRadioButton.setText(QtWidgets.QApplication.translate("AddComponentDialog", "&Mesh", None, -1))
         self.CylinderRadioButton.setText(QtWidgets.QApplication.translate("AddComponentDialog", "C&ylinder", None, -1))
-        self.createDiskChopperFieldsButton.setText(QtWidgets.QApplication.translate("AddComponentDialog", "Create Disk Chopper Fields", None, -1))
         self.shapeOptionsBox.setTitle(QtWidgets.QApplication.translate("AddComponentDialog", "Shape options:", None, -1))
         self.geometryFileBox.setTitle(QtWidgets.QApplication.translate("AddComponentDialog", "CAD file", None, -1))
         self.fileBrowseButton.setText(QtWidgets.QApplication.translate("AddComponentDialog", "Browse...", None, -1))
@@ -248,5 +247,6 @@ class Ui_AddComponentDialog(object):
         self.fieldsBox.setTitle(QtWidgets.QApplication.translate("AddComponentDialog", "Fields", None, -1))
         self.addFieldPushButton.setText(QtWidgets.QApplication.translate("AddComponentDialog", "Add field", None, -1))
         self.removeFieldPushButton.setText(QtWidgets.QApplication.translate("AddComponentDialog", "Remove field", None, -1))
+        self.createDiskChopperFieldsButton.setText(QtWidgets.QApplication.translate("AddComponentDialog", "Create Disk Chopper Fields", None, -1))
 
 from PySide2.QtWebEngineWidgets import QWebEngineView
