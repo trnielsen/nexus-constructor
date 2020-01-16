@@ -22,7 +22,8 @@ from ui.add_component import Ui_AddComponentDialog
 from nexus_constructor.component.component_type import (
     make_dictionary_of_class_definitions,
     PIXEL_COMPONENT_TYPES,
-    CHOPPER_CLASS_NAME)
+    CHOPPER_CLASS_NAME,
+)
 from nexus_constructor.nexus.nexus_wrapper import get_name_of_node
 from nexus_constructor.validators import (
     UnitValidator,

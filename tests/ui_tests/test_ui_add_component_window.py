@@ -235,8 +235,6 @@ def get_shape_type_button(dialog: AddComponentDialog, button_name: str):
     :return: The QRadioButton for the given shape type.
     """
     for child in dialog.shapeTypeBox.findChildren(PySide2.QtWidgets.QRadioButton):
-        print(child)
-        print(child.text())
         if child.text() == button_name:
             return child
 
