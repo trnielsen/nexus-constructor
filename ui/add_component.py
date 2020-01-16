@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'ui/add_component.ui',
 # licensing of 'ui/add_component.ui' applies.
 #
-# Created: Thu Jan 16 09:59:26 2020
+# Created: Thu Jan 16 10:39:55 2020
 #      by: pyside2-uic  running on PySide2 5.13.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -229,9 +229,9 @@ class Ui_AddComponentDialog(object):
         self.label_2.setText(QtWidgets.QApplication.translate("AddComponentDialog", "Description:", None, -1))
         self.label_3.setText(QtWidgets.QApplication.translate("AddComponentDialog", "Component type:", None, -1))
         self.shapeTypeBox.setTitle(QtWidgets.QApplication.translate("AddComponentDialog", "Shape type:", None, -1))
-        self.noShapeRadioButton.setText(QtWidgets.QApplication.translate("AddComponentDialog", "&No Shape", None, -1))
-        self.meshRadioButton.setText(QtWidgets.QApplication.translate("AddComponentDialog", "&Mesh", None, -1))
-        self.CylinderRadioButton.setText(QtWidgets.QApplication.translate("AddComponentDialog", "C&ylinder", None, -1))
+        self.noShapeRadioButton.setText(QtWidgets.QApplication.translate("AddComponentDialog", "No Shape", None, -1))
+        self.meshRadioButton.setText(QtWidgets.QApplication.translate("AddComponentDialog", "Mesh", None, -1))
+        self.CylinderRadioButton.setText(QtWidgets.QApplication.translate("AddComponentDialog", "Cylinder", None, -1))
         self.shapeOptionsBox.setTitle(QtWidgets.QApplication.translate("AddComponentDialog", "Shape options:", None, -1))
         self.geometryFileBox.setTitle(QtWidgets.QApplication.translate("AddComponentDialog", "CAD file", None, -1))
         self.fileBrowseButton.setText(QtWidgets.QApplication.translate("AddComponentDialog", "Browse...", None, -1))
