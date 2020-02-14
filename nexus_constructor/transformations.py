@@ -46,6 +46,8 @@ class Transformation:
         Get a Qt3DCore.QTransform describing the transformation
         """
         transform = Qt3DCore.QTransform()
+        # ui_vector = QVector3D(self.vector.x(), self.vector.z(), self.vector.y())
+        self.vector = QVector3D(self.vector.x(), self.vector.z(), self.vector.y())
         if self.type == TransformationType.ROTATION:
             quaternion = transform.fromAxisAndAngle(self.vector, self.ui_value)
             transform.setRotation(quaternion)

@@ -34,7 +34,7 @@ class InstrumentView(QWidget):
 
     def __init__(self, parent):
         super().__init__()
-
+        self.setParent(parent)
         self.root_entity = Qt3DCore.QEntity()
 
         # Make additional entities for the gnomon and instrument components
@@ -256,8 +256,8 @@ class InstrumentView(QWidget):
         the resultant transformation for its entire depends_on chain of translations and rotations
         """
         self.transformations[component_name] = transformation
-        component = self.component_entities[component_name]
-        component.addComponent(transformation)
+        component_entity = self.component_entities[component_name]
+        component_entity.addComponent(transformation)
 
     def clear_all_transformations(self):
         """
