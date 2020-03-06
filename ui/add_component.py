@@ -211,19 +211,19 @@ class Ui_AddComponentDialog(object):
         self.verticalLayout_2.addWidget(self.fieldsBox)
         self.verticalLayout_2.setStretch(5, 1)
         self.gridLayout_4.addLayout(self.verticalLayout_2, 0, 0, 1, 1)
-        self.webEngineView = QWebEngineView(self.widget)
+        #self.webEngineView = QWebEngineView(self.widget)
         sizePolicy = QtWidgets.QSizePolicy(
             QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred
         )
         sizePolicy.setHorizontalStretch(1)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(
-            self.webEngineView.sizePolicy().hasHeightForWidth()
-        )
-        self.webEngineView.setSizePolicy(sizePolicy)
-        self.webEngineView.setProperty("url", QtCore.QUrl("about:blank"))
-        self.webEngineView.setObjectName("webEngineView")
-        self.gridLayout_4.addWidget(self.webEngineView, 0, 1, 1, 1)
+        #sizePolicy.setHeightForWidth(
+        #    self.webEngineView.sizePolicy().hasHeightForWidth()
+        #)
+        #self.webEngineView.setSizePolicy(sizePolicy)
+        ##self.webEngineView.setProperty("url", QtCore.QUrl("about:blank"))
+        #self.webEngineView.setObjectName("webEngineView")
+        #self.gridLayout_4.addWidget(self.webEngineView, 0, 1, 1, 1)
         self.gridLayout_4.setColumnStretch(0, 1)
         self.gridLayout_4.setColumnStretch(1, 1)
         self.gridLayout_3.addWidget(self.widget, 0, 0, 1, 1)
